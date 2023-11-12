@@ -12,11 +12,11 @@ export const checkSwisscomCustomer = new DynamicStructuredTool({
       }).optional()
     }),
     func: async (options) => {
+      console.log(options)
       const { query, filter } = options
-      const metadata = filter?.tags || { tags: 'customers' }
+      const metadata = filter || { tags: 'customers' }
       // const chain = VectorDBQAChain.fromLLM(model, vectorStore)
       // const response = await chain.call({ query, metadata })
-      console.log(filter)
       console.log(metadata)
       const response = await vectorStore.similaritySearch(query, 4, metadata)
       console.log(response)

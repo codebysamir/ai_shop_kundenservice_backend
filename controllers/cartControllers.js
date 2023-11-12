@@ -2,6 +2,7 @@ import tempDB from "../tempDB.json" assert { type: 'json' }
 import { readFile, writeFile } from "fs/promises"
 import path from "path"
 import { fileURLToPath } from 'url'
+import { errorHandler } from "../middleware/errorHandler.js"
 
 const cartItems = tempDB.cart
 const cartCheckoutStatus = tempDB.checkoutStatus
@@ -21,8 +22,7 @@ export const startCheckout = async (req, res) => {
 
         res.status(200).json({output: `Checkout Status to ${status}`, status})
     } catch (error) {
-        console.log(error)
-        res.status(500).json({output: `get CarItems Error: ${JSON.stringify(error)}`, type: 'Get', error: error.error.message})
+        errorHandler(error, req, res)
     }
 }
 
@@ -36,8 +36,7 @@ export const getCartItems = async (req, res) => {
         }
         res.status(200).json(cart)
     } catch (error) {
-        console.log(error)
-        res.status(500).json({output: `get CarItems Error: ${JSON.stringify(error)}`, type: 'Get', error: error.error.message})
+        errorHandler(error, req, res)
     }
 }
 
@@ -58,8 +57,7 @@ export const postCartItems = async (req, res) => {
 
         res.status(200).json({output: 'Postet new Items to Cart successfully', data: cartItems})
     } catch (error) {
-        console.log(error)
-        res.status(500).json({output: `post CarItems Error: ${JSON.stringify(error)}`, type: 'Post', error: error.error.message})
+        errorHandler(error, req, res)
     }
 }
 
@@ -84,8 +82,7 @@ export const removeCartItems = async (req, res) => {
 
         res.status(200).json({output: 'Removed Items from Cart successfully', data: itemsToRemove})
     } catch (error) {
-        console.log(error)
-        res.status(500).json({output: `remove CarItems Error: ${JSON.stringify(error)}`, type: 'Remove', error: error.error.message})
+        errorHandler(error, req, res)
     }
 }
 
@@ -102,7 +99,6 @@ export const deleteCartItems = async (req, res) => {
 
         res.status(200).json({output: 'Deleted all Items from Cart successfully'})
     } catch (error) {
-        console.log(error)
-        res.status(500).json({output: `delete CarItems Error: ${JSON.stringify(error)}`, type: 'Delete', error: error.error.message})
+        errorHandler(error, req, res)
     }
 }

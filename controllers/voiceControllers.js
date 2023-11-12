@@ -2,10 +2,11 @@ import { clearFolder } from '../utils/clearFolder.js'
 import { createReadStream } from 'fs'
 import { openai } from "../models/openaiClient.js";
 import dotenv from 'dotenv'
+import { errorHandler } from '../middleware/errorHandler.js';
 dotenv.config()
 
 // Speech-To-Text (Open AI Whisper)
-export const sendVoice = async (req, res) => { 
+export const sendVoiceOpenAI = async (req, res) => { 
     // Get the saved file path from the req.file object
   console.log(req.file)
   const audioFile = req.file
@@ -49,6 +50,34 @@ export const sendVoice = async (req, res) => {
 }
 
 
+// Text-To-Speech (Open AI)
+export const getVoiceOpenAI = async (req, res) => {
+  console.log(req.body)
+  const prompt = req.body.prompt
+  const gender = req.body.gender
+  if (!prompt || !gender) res.status(404).send('No Prompt or Gender found!')
+  const voice_onyx_male = 'onyx'
+  const voice_nova_female = 'nova'
+  const voice_id = gender === 'female' ? voice_nova_female : voice_onyx_male
+
+  try {
+      const getVoice = await openai.audio.speech.create({
+        model: 'tts-1',
+        voice: voice_id,
+        input: prompt,
+      })
+      const resultBuffer = Buffer.from(await getVoice.arrayBuffer())
+      console.log(resultBuffer)
+      res.setHeader('Content-Type', 'audio/mpeg')
+      res.setHeader('Content-Disposition', 'attachment; filename-"audio.mp3"')
+      
+      res.status(200).send(resultBuffer)
+  } catch (error) {
+      console.log('openai error is: ', error)
+      errorHandler(error, req, res)
+  }
+}
+
 // Text-To-Speech (Elevenlabs)
 export const getVoiceElevenlabs = async (req, res) => {
   console.log(req.body)
@@ -87,24 +116,24 @@ export const getVoiceElevenlabs = async (req, res) => {
       
       res.status(200).send(resultBuffer)
   } catch (error) {
-      console.log('elevenlabs error is: ' + error)
-      res.status(500).json({output: error.message, error: error})
+      console.log('elevenlabs error is: ', error)
+      errorHandler(error, req, res)
   }
 }
 
 export const getCreditsElevenlabs = async (req, res) => {
+  console.log('Getting elevenlabs credits...')
   try {
-    const getCreditsRes = await fetch(`${process.env.ELEVENLABS_URL}/user/subscription`, {
+    const getCreditsRes = await fetch(`${process.env.ELEVENLABS_URL}/user`, {
       method: 'GET',
       headers: {
           'xi-api-key': process.env.ELEVENLABS_API_KEY,
-          'accept': '*/*',
+          'accept': 'application/json',
       }
     })
-    console.log(getCreditsRes)
     res.status(200).json(getCreditsRes)
   } catch (error) {
     console.log('elevenlabs get credits error: ', error)
-    res.status(500).json({output: error.detail[0].msg, error: error})
+    errorHandler(error, req, res)
   }
 }

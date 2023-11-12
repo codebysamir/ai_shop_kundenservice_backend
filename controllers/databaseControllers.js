@@ -5,6 +5,7 @@ import { clearFolder } from '../utils/clearFolder.js'
 import { Document } from "langchain/document";
 import { readFile } from "fs/promises"
 import dotenv from 'dotenv'
+import { errorHandler } from '../middleware/errorHandler.js';
 dotenv.config()
 
 // CREATE VECTOR
@@ -87,8 +88,7 @@ export const createVector = async (req, res) => {
         filename: file.originalname
       })
     } catch (error) {
-      console.log(error)
-      res.status(500).json({output: error.message || JSON.stringify(error)})
+      errorHandler(error, req, res)
     }
 }
 
@@ -173,8 +173,7 @@ export const updateVector = async (req, res) => {
       filename: file.originalname
     })
   } catch (error) {
-    console.log(error)
-    res.status(500).json({output: error.message || JSON.stringify(error)})
+    errorHandler(error, req, res)
   }
 }
 
@@ -221,8 +220,7 @@ export const deleteVector = async (req, res) => {
       output: 'Successfully DELETED vectors!', 
     })
   } catch (error) {
-    console.log(error)
-    res.status(500).json({message: error.message || JSON.stringify(error)})
+    errorHandler(error, req, res)
   }
 }
 
@@ -254,7 +252,6 @@ export const queryVector = async (req, res) => {
 
     res.status(200).json(response)
   } catch (error) {
-    console.log(error)
-    res.sendStatus(500)  
+    errorHandler(error, req, res)
   }
 }

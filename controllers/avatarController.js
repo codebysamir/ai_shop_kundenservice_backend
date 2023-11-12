@@ -5,6 +5,7 @@ import path from "path";
 import dotenv from 'dotenv'
 import { createReadStream } from 'fs';
 import { clearFolder } from '../utils/clearFolder.js';
+import { errorHandler } from '../middleware/errorHandler.js';
 dotenv.config()
 dIDClient.auth(process.env.DID_API_KEY);
 dIDResourcesClients.auth(process.env.DID_API_KEY);
@@ -37,12 +38,12 @@ export const createStream = async (req, res) => {
         })
 
         res.status(200).json(sessionResponse)
-    } catch (e) {
-      console.log('error during streaming setup', e);
-      if (e.status === 429 && e.data.kind === 'TooManyRequestsError') {
-        res.status(429).json({output: e.data.description, status: e.status, kind: e.data.kind})
+    } catch (error) {
+      console.log('error during streaming setup', error);
+      if (error.status === 429 && error.data.kind === 'TooManyRequestsError') {
+        res.status(429).json({output: error.data.description, status: error.status, kind: error.data.kind})
       }
-      res.status(500).json({output: 'error during creating stream setup', error: e});
+      errorHandler(error, req, res)
     }
 }
 
@@ -60,8 +61,8 @@ export const startStream = async (req, res) => {
         );
         console.log(`Stream active, SDP Response: `, sdpResponse?.data, sdpResponse?.status)
     } catch (error) {
-        console.log('error during streaming setup', error);
-        res.status(500).json({output: 'error during starting stream setup', error: error});
+      console.log('error during streaming setup', error);
+      errorHandler(error, req, res)
     }
 }
 
@@ -70,7 +71,7 @@ export const talkToStream = async (req, res) => {
   console.log(req.body)
   console.log(req.file)
   const { streamId, sessionId, message, gender, language, tts } = req.body
-  const audioFile = tts === 'elevenlabs_tts' ? req.file : ''
+  const audioFile = tts === 'elevenlabs_tts' || tts === 'openai_tts' ? req.file : ''
 
   let voice_id
   let microsoft_tts_script
@@ -89,15 +90,15 @@ export const talkToStream = async (req, res) => {
     }
   }
 
-  let elevenlabs_tts_script
+  let alternative_tts_script
   let audioURL
   
   try {
-    if (tts === 'elevenlabs_tts') {
+    if (tts === 'elevenlabs_tts' || tts === 'openai_tts') {
       const audioUpload = await dIDResourcesClients.uploadAnAudio({ audio: audioFile.path })
       console.log(audioUpload.data)
       audioURL = audioUpload.data.url
-      elevenlabs_tts_script = {
+      alternative_tts_script = {
         type: 'audio',
         // audio_url: 'https://d-id-public-bucket.s3.us-west-2.amazonaws.com/webrtc.mp3',
         audio_url: audioURL
@@ -113,7 +114,7 @@ export const talkToStream = async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        script: tts === 'microsoft_tts' ? microsoft_tts_script : elevenlabs_tts_script,
+        script: tts === 'microsoft_tts' ? microsoft_tts_script : alternative_tts_script,
         config: {
           align_driver: true,
           auto_match: true,
@@ -133,11 +134,16 @@ export const talkToStream = async (req, res) => {
         session_id: sessionId,
       }),
     });
-    console.log('talk status response: ', talkResponse)
+    const status = talkResponse.status
+    if (status === 200) {
+      console.log(`Talk status successfull - ${status}`)
+    } else {
+      console.log('talk status response: ', talkResponse)
+    }
     res.status(200).json(talkResponse.status)
   } catch (error) {
-    console.log(error)
-    res.status(500).json({output: 'An Error appeared on talkToStream Route.', error: error})
+    console.log('talk status errror: ')
+    errorHandler(error, req, res)
   } finally {
     clearFolder('./uploads')
   }
@@ -152,7 +158,7 @@ export const uploadImage = async (req, res) => {
       })
   } catch (error) {
       console.log('Image Upload error is: ', error)
-      res.status(500).send('Error happend on video Stream')
+      errorHandler(error, req, res)
   }
 }
 
@@ -166,7 +172,7 @@ export const uploadAudio = async (req, res) => {
         })
     } catch (error) {
         console.log('Audio Upload error is: ', error)
-        res.status(500).send('Error happend on video Stream')
+      errorHandler(error, req, res)
     }
 }
 
@@ -188,32 +194,32 @@ export const destroyStream = async (req, res) => {
     res.status(200).json({status: stopStream.status, data: stopStream})
   } catch (error) {
     console.log('Destroy Stream error is: ', error)
-    res.status(500).send('Error happend on video Stream')
+    errorHandler(error, req, res)
   }
 };
 
 export const onIceCandidate = async (req, res) => {
-    console.log('Gather ICE candidates...')
-    if (req.body.candidate) {
-      const { candidate, sdpMid, sdpMLineIndex, session_id, streamId } = req.body;
-  
-      try {
-          const getIceCandidate = await dIDClient.addIceCandidate(
-            {
-              candidate,
-              sdpMid,
-              sdpMLineIndex,
-              session_id,
-            },
-            {id: streamId}
-          );
-          console.log('Ice Candidate: ', getIceCandidate?.data)
-        res.status(200).json({output: 'Gather Ice Candidates', data: getIceCandidate.data})
-      } catch (error) {
-        console.log(error)
-        res.status(500).json({output: 'An Error appeared on Ice Candidate Route.', error: error})
-      }
+  console.log('Gather ICE candidates...')
+  if (req.body.candidate) {
+    const { candidate, sdpMid, sdpMLineIndex, session_id, streamId } = req.body;
+
+    try {
+        const getIceCandidate = await dIDClient.addIceCandidate(
+          {
+            candidate,
+            sdpMid,
+            sdpMLineIndex,
+            session_id,
+          },
+          {id: streamId}
+        );
+        console.log('Ice Candidate: ', getIceCandidate?.data)
+      res.status(200).json({output: 'Gather Ice Candidates', data: getIceCandidate.data})
+    } catch (error) {
+      console.log(error)
+      errorHandler(error, req, res)
     }
+  }
 }
 
 export const createTalk = async (req, res) => {
@@ -244,8 +250,8 @@ export const createTalk = async (req, res) => {
       console.log(`Talk Video: `, talkVideo)
       res.status(200).json(talkVideo)
   } catch (error) {
-      console.log('error during streaming setup', error);
-      res.status(500).json({output: 'error during starting stream setup', error: error});
+    console.log('error during streaming setup', error);
+    errorHandler(error, req, res)
   }
 } 
 export const getTalkVideo = async (req, res) => {
@@ -253,12 +259,12 @@ export const getTalkVideo = async (req, res) => {
   // console.log('req.body: ', req.body)
   // const {  } = req.body
   try {
-      const getVideo = await dIDClient.getTalks({id: 'tlk_9P-akNnp_bxw7cZ3dsyTU'});
-      console.log(`get Talk Video: `, getVideo.data.talks)
-      res.status(200).json(getVideo.data.talks)
+    const getVideo = await dIDClient.getTalks({id: 'tlk_9P-akNnp_bxw7cZ3dsyTU'});
+    console.log(`get Talk Video: `, getVideo.data.talks)
+    res.status(200).json(getVideo.data.talks)
   } catch (error) {
-      console.log('error during streaming setup', error);
-      res.status(500).json({output: 'error during starting stream setup', error: error});
+    console.log('error during streaming setup', error);
+      errorHandler(error, req, res)
   }
 } 
 export const talkWebhook = async (req, res) => {
@@ -266,10 +272,10 @@ export const talkWebhook = async (req, res) => {
   console.log('req.body: ', req.body)
   const data = req.body
   try {
-      res.status(200).json(data)
+    res.status(200).json(data)
   } catch (error) {
-      console.log('error during webhook', error);
-      res.status(500).json({output: 'error during webhook', error: error});
+    console.log('error during webhook', error);
+      errorHandler(error, req, res)
   }
 } 
 
@@ -281,7 +287,7 @@ export const getCredits = async (req, res) => {
     res.status(200).json(data.data)
   } catch (error) {
     console.log('error during get credits', error);
-    res.status(500).json({output: 'error during get credits', error: error});
+    errorHandler(error, req, res)
   }
 }
 

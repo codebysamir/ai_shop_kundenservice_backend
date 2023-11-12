@@ -15,6 +15,7 @@ import { OpenAIWhisperAudio } from "langchain/document_loaders/fs/openai_whisper
 import { checkCartProducts, addProductToCart, checkSwisscomCustomer, checkSwisscomProducts, checkSwisscomSmartphones, submitCustomerCheckoutDigitalAbo, submitCustomerCheckoutPhysicalProduct, removeProductFromCart} from "../tools/tools.js"
 import { openai } from "../models/openaiClient.js";
 import dotenv from 'dotenv'
+import { errorHandler } from "../middleware/errorHandler.js";
 dotenv.config()
 
 
@@ -22,13 +23,13 @@ dotenv.config()
 // SEND MESSAGE
 export const sendMessage = async (req, res) => {
 
-  const model = new ChatOpenAI({ temperature: 0 });
-  const gpt4 = new ChatOpenAI({ modelName: 'gpt-4' })
+  const model = new ChatOpenAI({ temperature: 0, modelName: 'gpt-3.5-turbo-1106' });
+  const gpt4 = new ChatOpenAI({ modelName: 'gpt-4-1106-preview' })
 
   const systemprompt = `Du bist Sales Consultant und arbeitest im Swisscom Shop, du betreust unsere Kundschaft mit deinen verkäuferischen sowie technischen Fähigkeiten. Du führst nur die folgenden Regeln durch:
   - Falls User bereits Kunde ist, kontrolliere seine Produkte und probiere ihm wen möglich und unaufdringlich verbesserung vorzuschlagen.
   - Bevor du ein Produkt zum Warenkorb hinzufügst, checkst du nach, ob das Produkt im Angebot ist und erst dann fügst du dieses Produkt, mit den Informationen von der Datenbank zum Warenkorb hinzu.  
-  - Immer wen der kunde ein digitales Produkt, wie z.b. ein Abo, kaufen will, fragst du vorher nach seinem Namen um den Kauf abzuschliessen und erst dann benutzt du das tool um den Einkauf abzuschliessen. 
+  - Immer wen der kunde ein digitales Produkt, wie z.b. ein Abo, kaufen will, fragst du vorher nach seinem Namen um den Kauf abzuschliessen.
   - Immer wen du dem Kunden ein produkt empfehlen willst, kontrollist du ob es auf Lager ist bzw. in der Datenbank existiert.
   - Du benutzt ausschliesslich NUR die in der Datenbank zur verfügung gestellten Abo Produkte, Smartphones/handys und kundendaten des befragten. 
   - Erwähne nie informationen die nicht in der Datenbank zur Verfügung stehen, falls du mehr Input Informationen brauchst fragst du danach. 
@@ -82,7 +83,7 @@ export const sendMessage = async (req, res) => {
       outputKey: 'output',
     })
     
-    const executor = await initializeAgentExecutorWithOptions(tools, model, {
+    const executor = await initializeAgentExecutorWithOptions(tools, gpt4, {
       agentType: "openai-functions",
       verbose: true,
       memory: memory,
@@ -113,12 +114,12 @@ export const sendMessage = async (req, res) => {
     // }
     // console.log('Audio: ', audioBuffer)
     res.status(200).json(result)
-  } catch (err) {
-    console.log(err)
-    if (err.code === 'context_length_exceeded') {
-      res.status(400).json({output: err.error.message, code: 'context_length_exceeded'})
+  } catch (error) {
+    console.log(error)
+    if (error.code === 'context_length_exceeded') {
+      res.status(400).json({output: error.error.message, code: 'context_length_exceeded'})
     } else {
-      res.status(500).json({output: err.message || JSON.stringify(err)})
+      errorHandler(error, req, res)
     }
   }
 }
@@ -161,9 +162,9 @@ export const sendVoice = async (req, res) => {
       message: speechToText,
       // tokens: response.data.usage.total_tokens
     })
-  } catch (err) {
-    console.log('Catch Error is: ' + err)
-    res.status(500).json({output: err.message || JSON.stringify(err)})
+  } catch (error) {
+    console.log('Catch Error is: ' + error)
+    errorHandler(error, req, res)
   }
   clearFolder('./uploads')
 }

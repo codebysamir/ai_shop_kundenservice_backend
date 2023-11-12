@@ -8,6 +8,7 @@ import avatarRoutes from "./routes/avatarRoutes.js"
 import voiceRoutes from "./routes/voiceRoutes.js"
 import axios from "axios"
 import dotenv from 'dotenv'
+import { logger } from "./middleware/logger.js";
 dotenv.config()
 
 const storage = multer.diskStorage({
@@ -28,6 +29,7 @@ const corsOptions = {
 };
 
 const app = express()
+app.use(logger)
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({extended: true}))
 app.use(cors(corsOptions))
