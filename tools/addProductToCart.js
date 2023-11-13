@@ -9,7 +9,7 @@ export const addProductToCart = new DynamicStructuredTool({
       products: z.array(
         z.object({
           product: z.string().describe('productabo for example "blue telefonie L" or "iPhone 15'),
-          details: z.string().optional().describe('If the product has important details like smartphone color and RAM or the speed of the abo'),
+          details: z.string().describe('Details about the product like for smartphone it will be {color} and {RAM}. For abos it will be only the {data speed}.'),
           price: z.string().describe('price of that product in CHF'),
         })
       ).describe('An Array of all the products that the customer wants to order, each product is an object with productname and price'),

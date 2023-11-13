@@ -1,13 +1,4 @@
 {
-  "cart": [
-    {
-      "product": "blue Internet L",
-      "price": "89.90"
-    },
-    {
-      "product": "blue Internet L",
-      "price": "89.90"
-    }
-  ],
-  "checkoutStatus": true
+  "cart": [],
+  "checkoutStatus": false
 }
