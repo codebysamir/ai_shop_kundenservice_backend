@@ -11,9 +11,12 @@ import dotenv from 'dotenv'
 import { logger } from "./middleware/logger.js";
 dotenv.config()
 
+const uploadDest = process.env.RAILWAY_VOLUME_MOUNT_PATH ?? 'uploads'
+console.log(uploadDest)
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads')
+    cb(null, uploadDest)
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
