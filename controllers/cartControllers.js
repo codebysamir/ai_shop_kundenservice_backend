@@ -4,21 +4,22 @@ import path from "path"
 import { fileURLToPath } from 'url'
 import { errorHandler } from "../middleware/errorHandler.js"
 
-const cartItems = tempDB.cart
-const cartCheckoutStatus = tempDB.checkoutStatus
 
 export const startCheckout = async (req, res) => {
-    console.log('Cart Items: ', cartItems)
-    console.log('Cart Checkout Status: ', cartCheckoutStatus)
     try {
         console.log(req.body)
         const filePath = path.resolve('./', 'tempDB.json')
+        const file = await readFile(filePath, 'utf-8')
+        const fileData = JSON.parse(file)
+        const dataCartItems = fileData.cart
+        console.log('Cart Items: ', dataCartItems)
+        console.log('Cart Checkout Status: ', fileData.checkoutStatus)
         const status = req.body?.status
         if (!req.body) return res.status(404).json({output: 'No Status found.'})
         console.log(`new Status: ${status}`)
 
-        tempDB.checkoutStatus = status
-        await writeFile(filePath, JSON.stringify(tempDB, null, 2), 'utf-8')
+        fileData.checkoutStatus = status
+        await writeFile(filePath, JSON.stringify(fileData, null, 2), 'utf-8')
 
         res.status(200).json({output: `Checkout Status to ${status}`, status})
     } catch (error) {
@@ -27,12 +28,17 @@ export const startCheckout = async (req, res) => {
 }
 
 export const getCartItems = async (req, res) => {
-    console.log('Cart Items: ', cartItems)
-    console.log('Cart Checkout Status: ', tempDB.checkoutStatus)
     try {
+    const filePath = path.resolve('./', 'tempDB.json')
+    const file = await readFile(filePath, 'utf-8')
+    const fileData = JSON.parse(file)
+    const dataCartItems = fileData.cart
+    console.log('Cart Items: ', dataCartItems)
+    console.log('Cart Checkout Status: ', fileData.checkoutStatus)
+    
         const cart = {
-            cartCheckoutStatus: tempDB.checkoutStatus,
-            cartItems
+            cartCheckoutStatus: fileData.checkoutStatus,
+            cartItems: dataCartItems
         }
         res.status(200).json(cart)
     } catch (error) {
@@ -46,16 +52,19 @@ export const postCartItems = async (req, res) => {
         const filePath = path.resolve('./', 'tempDB.json')
         console.log(filePath)
         const file = await readFile(filePath, 'utf-8')
+        const fileData = JSON.parse(file)
+        const dataCartItems = fileData.cart
+
         const products = req.body
         if (!products) return res.status(404).json({output: 'No Products found.'})
         const newItems = Array.isArray(products) ? products : [products]
         console.log(`newItems: ${newItems}`)
 
-        cartItems.push(...newItems)
-        console.log(cartItems)
-        await writeFile(filePath, JSON.stringify(tempDB, null, 2), 'utf-8')
+        dataCartItems.push(...newItems)
+        console.log(dataCartItems)
+        await writeFile(filePath, JSON.stringify(fileData, null, 2), 'utf-8')
 
-        res.status(200).json({output: 'Postet new Items to Cart successfully', data: cartItems})
+        res.status(200).json({output: 'Postet new Items to Cart successfully', data: dataCartItems})
     } catch (error) {
         errorHandler(error, req, res)
     }
@@ -67,16 +76,19 @@ export const removeCartItems = async (req, res) => {
         const filePath = path.resolve('./', 'tempDB.json')
         console.log(filePath)
         const file = await readFile(filePath, 'utf-8')
+        const fileData = JSON.parse(file)
+        const dataCartItems = fileData.cart
+
         const products = req.body
         if (!products) return res.status(404).json({output: 'No Products found.'})
         const itemsToRemove = Array.isArray(products) ? products : [products]
 
-        const filteredCart = cartItems.filter(cartItem => {
+        const filteredCart = dataCartItems.filter(cartItem => {
             const itemToRemove = itemsToRemove.find(item => item.product === cartItem.product) 
             return cartItem.product !== itemToRemove?.product
         })
         console.log(filteredCart)
-        cartItems.splice(0, cartItems.length, ...filteredCart)
+        dataCartItems.splice(0, dataCartItems.length, ...filteredCart)
 
         await writeFile(filePath, JSON.stringify(tempDB, null, 2), 'utf-8')
 
@@ -91,11 +103,13 @@ export const deleteCartItems = async (req, res) => {
         const filePath = path.resolve('./', 'tempDB.json')
         console.log(filePath)
         const file = await readFile(filePath, 'utf-8')
-       
-        cartItems.splice(0, cartItems.length)
-        tempDB.checkoutStatus = false
+        const fileData = JSON.parse(file)
+        const dataCartItems = fileData.cart
 
-        await writeFile(filePath, JSON.stringify(tempDB, null, 2), 'utf-8')
+        dataCartItems.splice(0, dataCartItems.length)
+        fileData.checkoutStatus = false
+
+        await writeFile(filePath, JSON.stringify(fileData, null, 2), 'utf-8')
 
         res.status(200).json({output: 'Deleted all Items from Cart successfully'})
     } catch (error) {

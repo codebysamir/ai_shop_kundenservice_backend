@@ -28,7 +28,7 @@ export const sendMessage = async (req, res) => {
 
   const systemprompt = `Du bist Sales Consultant und arbeitest im Swisscom Shop, du betreust unsere Kundschaft mit deinen verkäuferischen sowie technischen Fähigkeiten. Du führst nur die folgenden Regeln durch:
   - Falls User bereits Kunde ist, kontrolliere seine Produkte und probiere ihm wen möglich und unaufdringlich verbesserung vorzuschlagen.
-  - Bevor du ein Produkt zum Warenkorb hinzufügst, checkst du nach, ob das Produkt im Angebot ist und erst dann fügst du dieses Produkt, mit den Informationen von der Datenbank zum Warenkorb hinzu.  
+  - Bevor du ein Produkt zum Warenkorb hinzufügst, checkst du nach, ob das Produkt im Angebot ist und erst dann fügst du dieses Produkt, mit den Informationen von der Datenbank, zum Warenkorb hinzu.  
   - Immer wen der kunde ein digitales Produkt, wie z.b. ein Abo, kaufen will, fragst du vorher nach seinem Namen um den Kauf abzuschliessen.
   - Immer wen du dem Kunden ein produkt empfehlen willst, kontrollist du ob es auf Lager ist bzw. in der Datenbank existiert.
   - Du benutzt ausschliesslich NUR die in der Datenbank zur verfügung gestellten Abo Produkte, Smartphones/handys und kundendaten des befragten. 
@@ -165,6 +165,9 @@ export const sendVoice = async (req, res) => {
   } catch (error) {
     console.log('Catch Error is: ' + error)
     errorHandler(error, req, res)
+  } finally {
+    if (process.env.NODE_ENV === 'development') {
+      clearFolder('./uploads')
+    }
   }
-  clearFolder('./uploads')
 }

@@ -13,6 +13,7 @@ dotenv.config()
 
 const uploadDest = process.env.RAILWAY_VOLUME_MOUNT_PATH ?? 'uploads'
 console.log(uploadDest)
+console.log(process.env.NODE_ENV)
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -43,10 +44,10 @@ app.use('/api/cart', cartRoutes)
 app.use('/api/avatar', upload.single('fileUpload'), avatarRoutes)
 app.use('/api/voice', upload.single('fileUpload'), voiceRoutes)
 
-const testGet = async () => {
-  const response = await axios.get('http://localhost:5000/api/cart/get')
-  console.log(response.data)
-}
+// const testGet = async () => {
+//   const response = await axios.get('http://localhost:5000/api/cart/get')
+//   console.log(response.data)
+// }
 // testGet()
 
 const testPost = async () => {
@@ -76,6 +77,12 @@ const testRemove = async () => {
   console.log(response.data)
 }
 // testRemove()
+
+const testDeleteAll = async () => {
+  const response = await axios.delete('http://localhost:5000/api/cart/delete')
+  console.log(response.data)
+}
+// testDeleteAll()
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => console.log(`Server is listening on Port ${PORT}`))

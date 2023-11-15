@@ -42,11 +42,14 @@ export const sendVoiceOpenAI = async (req, res) => {
       message: speechToText,
       // tokens: response.data.usage.total_tokens
     })
-  } catch (err) {
-    console.log('Catch Error is: ' + err)
-    res.status(500).json({output: err.message || JSON.stringify(err)})
+  } catch (error) {
+    console.log('Catch Error is: ' + error)
+    errorHandler(error, req, res)
+  } finally {
+    if (process.env.NODE_ENV === 'development') {
+      clearFolder('./uploads')
+    }
   }
-  clearFolder('./uploads')
 }
 
 

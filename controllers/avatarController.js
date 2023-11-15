@@ -145,7 +145,9 @@ export const talkToStream = async (req, res) => {
     console.log('talk status errror: ')
     errorHandler(error, req, res)
   } finally {
-    clearFolder('./uploads')
+    if (process.env.NODE_ENV === 'development') {
+      clearFolder('./uploads')
+    }
   }
 };
 
