@@ -4,11 +4,11 @@ import { z } from "zod";
 
 export const checkSwisscomProducts = new DynamicStructuredTool({
     name: 'checkSwisscomProducts',
-    description: 'This function queries/asks a question to a index, in the Database Pinecone, for available swisscom abo products (for example: mobile abo, internet abo, tv abo and festnetz abo) and returns the top answer. The arguments "query" should be your question/input, "tags" should only contain one of the searchKeys: "products" for all products and "Internet", "Mobile" or "Festnetz" for specific abo, never use others.',
+    description: 'This function checks for available swisscom abo products (for example: mobile abo, internet abo, tv abo and festnetz abo) and returns the top answer. The argument {tags} in {filter} is additional help for searching the metadata with keywords, "tags" should only contain one of the searchKeys: "products" for all products, if no specific product is mentioned, or "Internet", "Mobile", "TV" or "Festnetz" for specific abo, never use others.',
     schema: z.object({
         query: z.string().describe('The input question to search for the abo/product'),
         filter: z.object({
-        tags: z.string().optional().describe('Filters the metadata for specific product category. Only use following searchKeys: "products" for all products and "Internet", "Mobile" or "Festnetz" for specific abo, never use others.')
+        tags: z.enum(['Internet', 'Mobile', 'Festnetz', 'TV', 'products']).describe('Filters the metadata for specific product category. Only use following searchKeys: "products" for all products or "Internet", "Mobile", "TV" or "Festnetz" for specific abo, never use others.')
         })
     }),
     func: async (options) => {

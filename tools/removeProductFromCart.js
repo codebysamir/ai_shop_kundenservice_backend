@@ -2,7 +2,7 @@ import axios from "axios";
 import { DynamicStructuredTool } from "langchain/tools"
 import { z } from "zod";
 
-const BACKEND_URL = import.meta.BACKEND_URL
+const BACKEND_URL = process.env.BACKEND_URL
 
 export const removeProductFromCart = new DynamicStructuredTool({
     name: 'removeProductFromCart',
@@ -10,6 +10,7 @@ export const removeProductFromCart = new DynamicStructuredTool({
     schema: z.object({
       products: z.array(
         z.object({
+          id: z.string().describe('ID of that product in the cartlist, id example: "65567b1e3e6eae9516d81337"'),
           product: z.string().describe('productabo for example "blue telefonie L" or "iPhone 15'),
           price: z.string().describe('price of that product in CHF'),
         })
@@ -22,10 +23,10 @@ export const removeProductFromCart = new DynamicStructuredTool({
       const productnames = products?.map(prod => prod.product)
       
       const getCartProducts = await axios.get(BACKEND_URL + '/api/cart/get')
-      const productsToRemove = getCartProducts.data.cartItems.filter(prod => prod.product === products.find(p => prod.product === p.product)?.product)
-      console.log(productsToRemove)
+      const productsToRemove = getCartProducts.data.cartItems.filter(prod => prod._id === products.find(p => prod._id === p.id)?.id)
+      console.log('Products to Remove: ', productsToRemove)
 
-      if (!productsToRemove.length) return 'Error removing Product: Input product doesnt exist in the cart, please enter correct name. If you dont know the correct name check the cart. Maybe it was a Typo, try again.' 
+      if (!productsToRemove.length) return 'Error removing Product: Input product doesnt exist in the cart, please enter correct product details. If you dont know the correct product details check the cart. Maybe it was a Typo, try again.' 
 
       console.log('test if removed function starts')
       const response = await axios.post(BACKEND_URL + '/api/cart/remove', productsToRemove)

@@ -5,32 +5,32 @@ import { fileURLToPath } from 'url'
 import { errorHandler } from "../middleware/errorHandler.js"
 import { Cart } from "../mongoDB/cartSchema.js"
 
-const railwayPath = process.env.NODE_ENV === 'production' ? path.resolve(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'tempDB.json') : ''
-if (process.env.NODE_ENV === 'production') {
-    console.log('First try Railway Path: ', railwayPath)
+// const railwayPath = process.env.NODE_ENV === 'production' ? path.resolve(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'tempDB.json') : ''
+// if (process.env.NODE_ENV === 'production') {
+//     console.log('First try Railway Path: ', railwayPath)
     
-    const checkOrCreateDB = async () => {
-        try {
-            const doesDBExist = await access(railwayPath, constants.F_OK)
-            console.log('Does DB exist: ', doesDBExist)
-        } catch (error) {
-            console.log('Creating DB JSON File...')
-            const initialData = {
-                "cart": [],
-                "checkoutStatus": false
-            }
-            await writeFile(railwayPath, JSON.stringify(initialData))
-        }
-        console.log('Should now exist: ', railwayPath)
-    }
-    checkOrCreateDB()
-}
-// const filePath = path.resolve('./', 'tempDB.json')
-const filePath = process.env.NODE_ENV === 'production' ? railwayPath : path.resolve('./', 'tempDB.json')
+//     const checkOrCreateDB = async () => {
+//         try {
+//             const doesDBExist = await access(railwayPath, constants.F_OK)
+//             console.log('Does DB exist: ', doesDBExist)
+//         } catch (error) {
+//             console.log('Creating DB JSON File...')
+//             const initialData = {
+//                 "cart": [],
+//                 "checkoutStatus": false
+//             }
+//             await writeFile(railwayPath, JSON.stringify(initialData))
+//         }
+//         console.log('Should now exist: ', railwayPath)
+//     }
+//     checkOrCreateDB()
+// }
+// // const filePath = path.resolve('./', 'tempDB.json')
+// const filePath = process.env.NODE_ENV === 'production' ? railwayPath : path.resolve('./', 'tempDB.json')
 
 const cartId = '655658662c595be3948a84ee'
 
-export const startCheckout = async (req, res) => {
+export const startCheckoutLOCAL = async (req, res) => {
     try {
         console.log(req.body)
         const file = await readFile(filePath, 'utf-8')
@@ -51,7 +51,7 @@ export const startCheckout = async (req, res) => {
     }
 }
 
-export const startCheckoutTest = async (req, res) => {
+export const startCheckout = async (req, res) => {
     try {
         console.log(req.body)
         const cart = await Cart.findById(cartId)
@@ -72,7 +72,7 @@ export const startCheckoutTest = async (req, res) => {
     }
 }
 
-export const getCartItems = async (req, res) => {
+export const getCartItemsLOCAL = async (req, res) => {
     try {
     const file = await readFile(filePath, 'utf-8')
     const fileData = JSON.parse(file)
@@ -90,7 +90,7 @@ export const getCartItems = async (req, res) => {
     }
 }
 
-export const getCartItemsTest = async (req, res) => {
+export const getCartItems = async (req, res) => {
     try {
         const cart = await Cart.findById(cartId)
         console.log(cart)
@@ -110,7 +110,7 @@ export const getCartItemsTest = async (req, res) => {
     }
 }
 
-export const postCartItems = async (req, res) => {
+export const postCartItemsLOCAL = async (req, res) => {
     try {
         console.log(`Req.body: ${req.body}`)
         console.log(filePath)
@@ -133,7 +133,7 @@ export const postCartItems = async (req, res) => {
     }
 }
 
-export const postCartItemsTest = async (req, res) => {
+export const postCartItems = async (req, res) => {
     try {
         console.log(`Req.body: ${req.body}`)
         const cart = await Cart.findById(cartId)
@@ -163,7 +163,7 @@ export const postCartItemsTest = async (req, res) => {
     }
 }
 
-export const removeCartItems = async (req, res) => {
+export const removeCartItemsLOCAL = async (req, res) => {
     try {
         console.log(req.body)
         console.log(filePath)
@@ -190,7 +190,38 @@ export const removeCartItems = async (req, res) => {
     }
 }
 
-export const deleteCartItems = async (req, res) => {
+export const removeCartItems = async (req, res) => {
+    try {
+        console.log(req.body)
+        const cart = await Cart.findById(cartId)
+        console.log(cart)
+        const cartItems = cart.products
+        const cartCheckoutStatus = cart.checkoutStatus
+        console.log('Cart Items: ', cartItems)
+        console.log('Cart Checkout Status: ', cartCheckoutStatus)
+
+        const products = req.body
+        if (!products) return res.status(404).json({output: 'No Products found.'})
+        const itemsToRemove = Array.isArray(products) ? products : [products]
+
+        const filteredCart = cartItems.filter(cartItem => {
+            console.log('CartItem to check _id for filter: ', cartItem)
+            console.log('CartItem ID value check: ', cartItem._id.toString())
+            const itemToRemove = itemsToRemove.find(item => item._id === cartItem._id.toString()) 
+            console.log('Founded itemToRemove for ID comparison: ', itemToRemove)
+            return cartItem._id.toString() !== itemToRemove?._id
+        })
+        console.log(filteredCart)
+
+        await Cart.findByIdAndUpdate(cartId, { $set: { products: filteredCart } }, { new: true })
+
+        res.status(200).json({output: 'Removed Items from Cart successfully', data: itemsToRemove})
+    } catch (error) {
+        errorHandler(error, req, res)
+    }
+}
+
+export const deleteCartItemsLOCAL = async (req, res) => {
     try {
         console.log(filePath)
         const file = await readFile(filePath, 'utf-8')
@@ -201,6 +232,26 @@ export const deleteCartItems = async (req, res) => {
         fileData.checkoutStatus = false
 
         await writeFile(filePath, JSON.stringify(fileData, null, 2), 'utf-8')
+
+        res.status(200).json({output: 'Deleted all Items from Cart successfully'})
+    } catch (error) {
+        errorHandler(error, req, res)
+    }
+}
+
+export const deleteCartItems = async (req, res) => {
+    try {
+        const cart = await Cart.findById(cartId)
+        console.log(cart)
+        const cartItems = cart.products
+        const cartCheckoutStatus = cart.checkoutStatus
+        console.log('Cart Items: ', cartItems)
+        console.log('Cart Checkout Status: ', cartCheckoutStatus)
+
+        await Cart.findByIdAndUpdate(cartId, { $set: { 
+            checkoutStatus: false, 
+            products: [] 
+        }}, { new: true })
 
         res.status(200).json({output: 'Deleted all Items from Cart successfully'})
     } catch (error) {

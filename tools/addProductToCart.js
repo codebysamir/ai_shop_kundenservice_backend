@@ -2,7 +2,7 @@ import axios from "axios";
 import { DynamicStructuredTool } from "langchain/tools"
 import { z } from "zod";
 
-const BACKEND_URL = import.meta.BACKEND_URL
+const BACKEND_URL = process.env.BACKEND_URL
 
 export const addProductToCart = new DynamicStructuredTool({
     name: 'addProductToCart',
