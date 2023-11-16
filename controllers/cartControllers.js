@@ -5,28 +5,28 @@ import { fileURLToPath } from 'url'
 import { errorHandler } from "../middleware/errorHandler.js"
 import { Cart } from "../mongoDB/cartSchema.js"
 
-// const railwayPath = process.env.NODE_ENV === 'production' ? path.resolve(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'tempDB.json') : ''
-// if (process.env.NODE_ENV === 'production') {
-//     console.log('First try Railway Path: ', railwayPath)
+const railwayPath = process.env.NODE_ENV === 'production' ? path.resolve(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'tempDB.json') : ''
+if (process.env.NODE_ENV === 'production') {
+    console.log('First try Railway Path: ', railwayPath)
     
-//     const checkOrCreateDB = async () => {
-//         try {
-//             const doesDBExist = await access(railwayPath, constants.F_OK)
-//             console.log('Does DB exist: ', doesDBExist)
-//         } catch (error) {
-            
-//             const initialData = {
-//                 "cart": [],
-//                 "checkoutStatus": false
-//             }
-//             await writeFile(railwayPath, JSON.stringify(initialData))
-//         }
-//         console.log('Should now exist: ', railwayPath)
-//     }
-//     checkOrCreateDB()
-// }
-const filePath = path.resolve('./', 'tempDB.json')
-// const filePath = process.env.NODE_ENV === 'production' ? railwayPath : path.resolve('./', 'tempDB.json')
+    const checkOrCreateDB = async () => {
+        try {
+            const doesDBExist = await access(railwayPath, constants.F_OK)
+            console.log('Does DB exist: ', doesDBExist)
+        } catch (error) {
+            console.log('Creating DB JSON File...')
+            const initialData = {
+                "cart": [],
+                "checkoutStatus": false
+            }
+            await writeFile(railwayPath, JSON.stringify(initialData))
+        }
+        console.log('Should now exist: ', railwayPath)
+    }
+    checkOrCreateDB()
+}
+// const filePath = path.resolve('./', 'tempDB.json')
+const filePath = process.env.NODE_ENV === 'production' ? railwayPath : path.resolve('./', 'tempDB.json')
 
 const cartId = '655658662c595be3948a84ee'
 
