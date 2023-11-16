@@ -2,11 +2,13 @@ import axios from "axios";
 import { DynamicTool } from "langchain/tools"
 import { z } from "zod";
 
+const BACKEND_URL = import.meta.BACKEND_URL
+
 export const checkCartProducts = new DynamicTool({
   name: 'checkCartProducts',
   description: 'This function checks which, if any, products are in the cart and informs either the user or yourself (Swisscom Sales Consultant) about the status. \n 1. Only use this information for yourself, except the user asks for it.',
   func: async () => {
-      const response = await axios.get('http://localhost:5000/api/cart/get')
+      const response = await axios.get(BACKEND_URL + '/api/cart/get')
       console.log(response.data)
     const productnames = response.data.cartItems?.map(prod => prod.product)
     let total = 0

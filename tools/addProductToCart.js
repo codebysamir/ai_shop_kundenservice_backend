@@ -2,6 +2,8 @@ import axios from "axios";
 import { DynamicStructuredTool } from "langchain/tools"
 import { z } from "zod";
 
+const BACKEND_URL = import.meta.BACKEND_URL
+
 export const addProductToCart = new DynamicStructuredTool({
     name: 'addProductToCart',
     description: 'This function adds a digital or a physical product to the cart and displays to the user. \n 1. If the user wants to buy a product add it to the cart. 2. Be accurate to name every detail of the product precisly.',
@@ -20,7 +22,7 @@ export const addProductToCart = new DynamicStructuredTool({
       console.log(products, total)
       const productnames = products?.map(prod => prod.product)
 
-      const response = await axios.post('http://localhost:5000/api/cart/post', products)
+      const response = await axios.post(BACKEND_URL + '/api/cart/post', products)
       console.log(response.data)
 
       return `${productnames.join(', ')} for ${total} added to the Cart`

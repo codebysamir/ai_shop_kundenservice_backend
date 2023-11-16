@@ -8,7 +8,7 @@ export const checkSwisscomSmartphones = new DynamicStructuredTool({
     schema: z.object({
         query: z.string().describe('The input question to search for the smartphone details'),
         filter: z.object({
-        tags: z.string().default('smartphones').describe('Filters the metadata. Always use "smartphones", optional: "Apple", "Samsung" etc.')
+            tags: z.enum(['Apple', 'Samsung', 'smartphones']).describe('Filters the metadata for smartphone brands like "Apple", "Samsung" etc., if no smartphone brand is available, use {smartphones}')
         })
     }),
     func: async (options) => {

@@ -2,6 +2,8 @@ import axios from "axios";
 import { DynamicStructuredTool } from "langchain/tools"
 import { z } from "zod";
 
+const BACKEND_URL = import.meta.BACKEND_URL
+
 export const submitCustomerCheckoutPhysicalProduct = new DynamicStructuredTool({
     name: 'submitCustomerCheckoutPhysicalProduct',
     description: 'This function ends the customer conversation with completing the shopcart. List everything that the customer ordered with price for each product and the total. Ask the customer if he is already a swisscom customer. Update the Database for stock amount of those products.',
@@ -29,7 +31,7 @@ export const submitCustomerCheckoutPhysicalProduct = new DynamicStructuredTool({
       // });
       // console.log(JSON.stringify(obj))
       // return JSON.stringify(obj)
-      await axios.post('http://localhost:5000/api/cart/checkout', {status: true})
+      await axios.post(BACKEND_URL + '/api/cart/checkout', {status: true})
       return `You ordered ${productnames.join(', ')} for ${total}`
     }
 })

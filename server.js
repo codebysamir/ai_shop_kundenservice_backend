@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { connection } from "./models/mongoDBClient.js";
 import multer from "multer"
 import databaseRoutes from "./routes/databaseRoutes.js"
 import chatRoutes from "./routes/chatRoutes.js"
@@ -85,4 +86,7 @@ const testDeleteAll = async () => {
 // testDeleteAll()
 
 const PORT = process.env.PORT || 5000
-app.listen(PORT, () => console.log(`Server is listening on Port ${PORT}`))
+app.listen(PORT, () => {
+  connection(process.env.MONGODB_URL)
+  console.log(`Server is listening on Port ${PORT}`)
+})
