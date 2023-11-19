@@ -27,9 +27,21 @@ const storage = multer.diskStorage({
 })
 const upload = multer({ storage: storage })
 
+const allowedOrigins = [
+  'https://aishopkundenservicebackend-production.up.railway.app',
+  'http://127.0.0.1:5173',
+  'http://localhost:5173',
+  'http://localhost:3001'
+];
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        callback(null, true)
+    } else {
+        callback(new Error('Not allowed by CORS'));
+    }
+},
   optionsSuccessStatus: 200
 };
 
