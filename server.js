@@ -32,7 +32,7 @@ const allowedOrigins = [
   'http://127.0.0.1:5173',
   'http://localhost:5173',
   'http://localhost:3001',
-  'https://ai-kundenservice.netlify.app/'
+  'https://ai-kundenservice.netlify.app'
 ];
 
 const corsOptions = {
