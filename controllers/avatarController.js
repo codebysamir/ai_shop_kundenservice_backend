@@ -41,7 +41,7 @@ export const createStream = async (req, res) => {
     } catch (error) {
       console.log('error during streaming setup', error);
       if (error.status === 429 && error.data.kind === 'TooManyRequestsError') {
-        res.status(429).json({output: error.data.description, status: error.status, kind: error.data.kind})
+        return res.status(429).json({output: error.data.description, status: error.status, kind: error.data.kind})
       }
       errorHandler(error, req, res)
     }

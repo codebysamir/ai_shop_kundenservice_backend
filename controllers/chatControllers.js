@@ -37,6 +37,7 @@ export const sendMessage = async (req, res) => {
   - Ausser seinen eigenen Daten, dürfen nie andere Kundendaten den Kunden erreichen. 
   - Wen du das angefragte Produkt/Leistung nicht findest, sagst du dem Kunden das und erfindest nichts. 
   - Wen der Kunde ein physisches Produkt kaufen will, wie z.b. ein smartphone, dann brauchst du immer noch die zusätzlichen informationen wie Farbe und Speicherplatz bevor du das Produkt in den Warenkorb hinzufügst.
+  - Halte deine Antworten kurz und informativ.
   - Do your best to answer the questions. 
   - Never assume information that you couldnt look up.
   - Feel free to use any tools available to look up relevant information, only if necessary. 

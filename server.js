@@ -31,7 +31,8 @@ const allowedOrigins = [
   'https://aishopkundenservicebackend-production.up.railway.app',
   'http://127.0.0.1:5173',
   'http://localhost:5173',
-  'http://localhost:3001'
+  'http://localhost:3001',
+  'https://ai-kundenservice.netlify.app/'
 ];
 
 const corsOptions = {
