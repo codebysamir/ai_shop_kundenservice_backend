@@ -58,45 +58,6 @@ app.use('/api/cart', cartRoutes)
 app.use('/api/avatar', upload.single('fileUpload'), avatarRoutes)
 app.use('/api/voice', upload.single('fileUpload'), voiceRoutes)
 
-// const testGet = async () => {
-//   const response = await axios.get('http://localhost:5000/api/cart/get')
-//   console.log(response.data)
-// }
-// testGet()
-
-const testPost = async () => {
-  const body = [ 
-    {
-      product: 'Google Pixel 8',
-      price: '700 CHF'
-    }
-    ,{
-      product: 'Google Pixel 8 Pro',
-      price: '1000 CHF'
-    }
-  ]
-  const response = await axios.post('http://localhost:5000/api/cart/post', body)
-  console.log(response)
-}
-// testPost()
-
-const testRemove = async () => {
-  const body = [ 
-    {
-      product: 'Google Pixel 8',
-      price: '700 CHF'
-    }
-  ]
-  const response = await axios.post('http://localhost:5000/api/cart/remove', body)
-  console.log(response.data)
-}
-// testRemove()
-
-const testDeleteAll = async () => {
-  const response = await axios.delete('http://localhost:5000/api/cart/delete')
-  console.log(response.data)
-}
-// testDeleteAll()
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => {
