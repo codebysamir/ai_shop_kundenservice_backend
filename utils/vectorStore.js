@@ -1,6 +1,6 @@
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
+import { PineconeStore } from '@langchain/pinecone';
 import pineconeClient from '../models/pineconeModel.js'
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { OpenAIEmbeddings } from '@langchain/openai';
 
 const indexName = process.env.PINECONE_INDEX
 const pineconeIndex = pineconeClient.Index(indexName);

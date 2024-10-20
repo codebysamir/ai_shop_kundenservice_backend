@@ -1,5 +1,5 @@
 import axios from "axios";
-import { DynamicStructuredTool } from "langchain/tools"
+import { DynamicStructuredTool } from "@langchain/core/tools"
 import { z } from "zod";
 
 const BACKEND_URL = process.env.BACKEND_URL

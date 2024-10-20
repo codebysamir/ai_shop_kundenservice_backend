@@ -1,17 +1,12 @@
-import { DynamicStructuredTool, WikipediaQueryRun, SerpAPI, VectorStoreQATool } from "langchain/tools";
-import { ChatOpenAI } from "langchain/chat_models/openai";
+import { ChatOpenAI } from "@langchain/openai";
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { z } from "zod";
 import { ChatMessageHistory } from "langchain/memory";
-import { AIMessage, HumanMessage } from "langchain/schema";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { OpenAIAgentTokenBufferMemory } from "langchain/agents/toolkits";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { PineconeStore } from "langchain/vectorstores/pinecone"
-import pineconeClient from '../models/pineconeModel.js'
 import { clearFolder } from '../utils/clearFolder.js'
 import { createReadStream } from 'fs'
 import { chmod } from 'fs/promises'
-import { OpenAIWhisperAudio } from "langchain/document_loaders/fs/openai_whisper_audio"
 import { checkCartProducts, addProductToCart, checkSwisscomCustomer, checkSwisscomProducts, checkSwisscomSmartphones, submitCustomerCheckoutDigitalAbo, submitCustomerCheckoutPhysicalProduct, removeProductFromCart} from "../tools/tools.js"
 import { openai } from "../models/openaiClient.js";
 import dotenv from 'dotenv'
@@ -24,7 +19,7 @@ dotenv.config()
 export const sendMessage = async (req, res) => {
 
   const model = new ChatOpenAI({ temperature: 0, modelName: 'gpt-3.5-turbo-1106' });
-  const gpt4 = new ChatOpenAI({ modelName: 'gpt-4-1106-preview' })
+  const gpt4 = new ChatOpenAI({ modelName: 'gpt-4o' })
 
   const systemprompt = `Du bist Sales Consultant und arbeitest im Swisscom Shop, du betreust unsere Kundschaft mit deinen verkäuferischen sowie technischen Fähigkeiten. Du führst nur die folgenden Regeln durch:
   - Falls User bereits Kunde ist, kontrolliere seine Produkte und probiere ihm wen möglich und unaufdringlich verbesserung vorzuschlagen.

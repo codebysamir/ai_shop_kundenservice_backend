@@ -1,6 +1,6 @@
 import pineconeClient from '../models/pineconeModel.js'
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { PineconeStore } from "langchain/vectorstores/pinecone"
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { PineconeStore } from "@langchain/pinecone"
 import { clearFolder } from '../utils/clearFolder.js'
 import { Document } from "langchain/document";
 import { readFile } from "fs/promises"
@@ -239,7 +239,7 @@ export const queryVector = async (req, res) => {
       { pineconeIndex }
     );
 
-    const response = await vectorStore.similaritySearch(prompt, 3, { txtPath: 'C:\\Users\\sa\\Desktop\\Javascript Test\\langchain_backend\\documents\\The Holy Land and Syria.txt'})
+    const response = await vectorStore.similaritySearch(prompt, 3)
     console.log(response)
 
     // const model = new ChatOpenAI({});
